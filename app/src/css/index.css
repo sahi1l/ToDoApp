@@ -1,0 +1,20 @@
+#entries {
+    width: min(100vw,60ch);
+    margin: auto;
+    padding: 5px;
+}
+#entries>div {
+    display:grid;
+    grid-template-columns: 3ch 1fr 3ch;
+    opacity: 1;
+    transition: opacity 1s;
+    &.deleting {
+        opacity: 0;
+        transition: opacity 1s;
+        
+    }
+    &>input {
+        border: 0px;
+        border-bottom: 1px solid black;
+    }
+}

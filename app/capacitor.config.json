@@ -1,0 +1,11 @@
+{
+  "appId": "us.sahill.todo",
+  "appName": "ToDo",
+  "bundledWebRuntime": false,
+  "webDir": "dist",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  }
+}

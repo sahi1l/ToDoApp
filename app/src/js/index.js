@@ -1,4 +1,6 @@
-let $parent; 
+import {Preferences} from "@capacitor/preferences";
+let $parent;
+let prefkey="us_sahill_todo"
 let entries=[];
 function PushDonesDown() {
     let unchecked=[];
@@ -21,17 +23,22 @@ function FindFirstChecked(){
     }
     return {idx: entries.length-1, entry: null};
 }
-function Save() {
+async function Save() {
     let results=[];
     for(let entry of entries) {
         results.push(entry.getval());
     }
-    console.debug(JSON.stringify(results));
+    let encode = JSON.stringify(results);
+    Preferences.set({key:prefkey, value:encode});
+    console.debug("saved ",encode);
+    console.debug(await Preferences.get({key:prefkey}));
     //now save this as a cookie
 }
-function Load() {
+async function Load() {
     //load the cookie
     //loop through them and create, using SetVal
+    let encode = await Preferences.get({key:prefkey});
+    console.debug("loaded ",encode);
 }
 function Next(entry) {
     let idx = entries.indexOf(entry);
@@ -123,7 +130,7 @@ function ready(fn) {
 function init(){
     $parent = document.getElementById("entries");
     entries.push(new Entry());
-    entries.push(new Entry());
+    Load();
 //    entries[1].setval("@hello");
 }
 ready(init);

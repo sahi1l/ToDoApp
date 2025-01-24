@@ -34,6 +34,11 @@ async function Save() {
     console.debug(await Preferences.get({key:prefkey}));
     //now save this as a cookie
 }
+function AlwaysHaveOne() {
+    if(entries.length === 0) {
+        entries.push(new Entry());
+    }
+}
 async function Load() {
     //load the cookie
     //loop through them and create, using SetVal
@@ -47,10 +52,9 @@ async function Load() {
         entry.setval(task);
         entries.push(entry);
     }
-    if(entry === null) {
-        entries.push(new Entry());
-    }
+    AlwaysHaveOne();
     console.debug("loaded ",tasks);
+    PushDonesDown();
 }
 function Next(entry) {
     let idx = entries.indexOf(entry);
@@ -80,10 +84,11 @@ class Entry {
         $parent.appendChild(this.$w);
         this.$delete.addEventListener("click",(e,that=this)=> {
             that.delete();
+            Save();
         });
         this.$check.addEventListener("click",(e,that=this) => {
-            Save();
             PushDonesDown();
+            Save();
             //move to bottom of list or checked list as relevant
         });
         this.$text.addEventListener("blur",(e,that=this)=> {
@@ -118,6 +123,8 @@ class Entry {
             that.$check.remove();
             that.$delete.remove();
             that.$w.remove();
+            Save();
+            AlwaysHaveOne();
         },1000);
     }
     setval(val) {

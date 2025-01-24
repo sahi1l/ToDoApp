@@ -38,7 +38,19 @@ async function Load() {
     //load the cookie
     //loop through them and create, using SetVal
     let encode = await Preferences.get({key:prefkey});
-    console.debug("loaded ",encode);
+    console.debug(encode.value);
+    let tasks = JSON.parse(encode.value);
+    entries = [];
+    let entry = null;
+    for(let task of tasks) {
+        entry = new Entry();
+        entry.setval(task);
+        entries.push(entry);
+    }
+    if(entry === null) {
+        entries.push(new Entry());
+    }
+    console.debug("loaded ",tasks);
 }
 function Next(entry) {
     let idx = entries.indexOf(entry);
@@ -129,8 +141,6 @@ function ready(fn) {
 
 function init(){
     $parent = document.getElementById("entries");
-    entries.push(new Entry());
     Load();
-//    entries[1].setval("@hello");
 }
 ready(init);

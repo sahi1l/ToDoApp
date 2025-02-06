@@ -1,13 +1,18 @@
 import {Preferences} from "@capacitor/preferences";
-//import SetupSwipe from "./swipe.js";
+/*import SetupSwipe from "./swipe.js";
 function handleSwipe(dir) {
-    console.debug(document.getElementById("duh"));
+    DEBUG("handleSwipe: "+dir);
     document.getElementById("duh").innerHTML=dir;
 }
-//SetupSwipe(handleSwipe);
+SetupSwipe(handleSwipe);
+*/
+/*NOTE: Add logos on sides to drag on and swipe*/
 function DEBUG(txt) {
     console.debug(txt);
-    document.getElementById("debug").innerHTML += "<BR>" + txt;
+    let debug = document.getElementById("debug");
+    if(debug) {
+        debug.innerHTML += "<BR>" + txt;
+    }
 }
 let $parent;
 let prefkey="us_sahill_todo"
@@ -86,11 +91,15 @@ class Entry {
         this.$w = document.createElement("div");
         this.$check = document.createElement("input");
         this.$check.type = "checkbox";
+        this.$textwrapper = document.createElement("div");
+        this.$textwrapper.classList.add("textwrapper");
         this.$text = document.createElement("input");
+        this.$text.classList.add("text");
         this.$delete = document.createElement("button");
         this.$delete.innerHTML = "🗑";
         this.$w.appendChild(this.$check);
-        this.$w.appendChild(this.$text);
+        this.$w.appendChild(this.$textwrapper);
+        this.$textwrapper.appendChild(this.$text);
         this.$w.appendChild(this.$delete);
         $parent.appendChild(this.$w);
         this.$delete.addEventListener("click",(e,that=this)=> {

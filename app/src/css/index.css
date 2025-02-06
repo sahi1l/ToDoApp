@@ -1,19 +1,41 @@
-#entries {
-    width: min(100vw,60ch);
-    margin: auto;
-    padding: 5px;
+body {
+
 }
+#entries {
+    font-size:1.5em;
+}
+h1 {
+    width:100vw;
+    text-align: center;
+}
+
 #entries>div {
-    display:grid;
-    grid-template-columns: 3ch 1fr 3ch;
+    display:flex;
+    flex-direction: row;
+    ;
     opacity: 1;
     transition: opacity 1s;
+    width: 100%;
     &.deleting {
         opacity: 0;
         transition: opacity 1s;
-        
     }
-    &>input {
+    &>input[type="checkbox"] {
+        flex-grow: 0;
+        margin: 5px;
+        width: 1.5rem;
+        aspect-ratio: 1;
+    }
+    &>button {
+        flex-grow: 0;
+        margin: 5px;
+    }
+    .textwrapper {
+        flex-grow: 1;
+    }
+    .text {
+        font-size: 1.5rem;
+        width: 100%;
         border: 0px;
         border-bottom: 1px solid black;
     }

@@ -10,3 +10,5 @@ To run the provided example, you can use `npm start` command.
 ```bash
 npm start
 ```
+
+NOTE: Make sure that JAVA_HOME is set to the right JVM if you're building an APK.

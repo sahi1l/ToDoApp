@@ -1,4 +1,14 @@
 import {Preferences} from "@capacitor/preferences";
+//import SetupSwipe from "./swipe.js";
+function handleSwipe(dir) {
+    console.debug(document.getElementById("duh"));
+    document.getElementById("duh").innerHTML=dir;
+}
+//SetupSwipe(handleSwipe);
+function DEBUG(txt) {
+    console.debug(txt);
+    document.getElementById("debug").innerHTML += "<BR>" + txt;
+}
 let $parent;
 let prefkey="us_sahill_todo"
 let entries=[];
@@ -43,8 +53,9 @@ async function Load() {
     //load the cookie
     //loop through them and create, using SetVal
     let encode = await Preferences.get({key:prefkey});
+    DEBUG("PREF:"+encode.value+"<BR>");
     console.debug(encode.value);
-    let tasks = JSON.parse(encode.value);
+    let tasks = JSON.parse(encode.value)??[];
     entries = [];
     let entry = null;
     for(let task of tasks) {
@@ -53,7 +64,7 @@ async function Load() {
         entries.push(entry);
     }
     AlwaysHaveOne();
-    console.debug("loaded ",tasks);
+    DEBUG("done with Load");
     PushDonesDown();
 }
 function Next(entry) {
@@ -147,6 +158,7 @@ function ready(fn) {
 }
 
 function init(){
+    DEBUG("starting");
     $parent = document.getElementById("entries");
     Load();
 }

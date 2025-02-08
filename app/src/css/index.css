@@ -52,11 +52,18 @@ h1 {
     font-size: 10vw;
     bottom: 90vh;
     left: 0;
-        
+    transition:bottom 1s;
+    &:has(.active) {
+        transition:bottom 0s;
+    }
 }
 h1 {
     position:relative;
     z-index: 3;
+    margin:auto;
+    font-size:2rem;
+    display:inline-block;
+    pointer-events: none;
 }
 #display .swipe {
     position:absolute;

@@ -189,6 +189,8 @@ class DisplaySwipe {
     position(pct) {
     }
     start(e) {
+        console.debug(e);
+        if(e.target != this.$w) {return;}
         this.startco = GetCo(e);
         this.startbottom = -this.$root.getBoundingClientRect().y;
         this.$w.classList.add("active");

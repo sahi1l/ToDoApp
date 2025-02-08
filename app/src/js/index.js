@@ -166,9 +166,67 @@ function ready(fn) {
   }
 }
 
+function GetCo(e){
+    let obj;
+    if (e.touches) {obj=e.touches[0];} else {obj=e;}
+    return {x:obj.clientX,
+            y:obj.clientY};
+}
+let displayswipe;
+class DisplaySwipe {
+    constructor() {
+        this.$root = document.getElementById("display");
+        this.$w = this.$root.querySelector(".swipe");
+        console.debug(this.$root);
+        console.debug(this.$w);
+        this.start = this.start.bind(this);
+        this.move = this.move.bind(this);
+        this.end = this.end.bind(this);
+        addEventListener("mousedown",this.start);
+        addEventListener("mousemove",this.move);
+        addEventListener("mouseup",this.end);
+    }
+    position(pct) {
+    }
+    start(e) {
+        this.startco = GetCo(e);
+        this.startbottom = -this.$root.getBoundingClientRect().y;
+        this.$w.classList.add("active");
+        e.preventDefault();
+
+    }
+    move(e) {
+        e.preventDefault();
+        if (this.startco===undefined) {return;}
+        let co=GetCo(e);
+        let dy = co.y-this.startco.y;
+        let bottom = this.startbottom-dy;
+        if(bottom<0){bottom=0;}
+        
+        this.$root.style.bottom=bottom+"px";
+    }
+    end(e) {
+        this.startco = undefined;
+        this.$w.classList.remove("active");
+        let bot = parseInt(this.$root.style.bottom);
+        if(2*bot > window.innerHeight) {//closer to top
+            this.$root.style.bottom=(window.innerHeight-50)+"px";
+            this.$w.classList.add("swipedown");
+            this.$w.classList.remove("swipeup");
+        } else {
+            this.$root.style.bottom="0px";
+            this.$w.classList.add("swipeup");
+            this.$w.classList.remove("swipedown");
+        }
+        e.preventDefault();
+    }
+    
+}
+
 function init(){
     DEBUG("starting");
     $parent = document.getElementById("entries");
+    displayswipe = new DisplaySwipe();
     Load();
 }
 ready(init);

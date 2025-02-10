@@ -185,21 +185,25 @@ class DisplaySwipe {
         addEventListener("mousedown",this.start);
         addEventListener("mousemove",this.move);
         addEventListener("mouseup",this.end);
+        addEventListener("touchstart",this.start);
+        addEventListener("touchmove",this.move);
+        addEventListener("touchend",this.end);
     }
     position(pct) {
     }
     start(e) {
+        e.preventDefault();
         console.debug(e);
         if(e.target != this.$w) {return;}
         this.startco = GetCo(e);
         this.startbottom = -this.$root.getBoundingClientRect().y;
         this.$w.classList.add("active");
-        e.preventDefault();
 
     }
     move(e) {
         e.preventDefault();
         if (this.startco===undefined) {return;}
+        this.setMode(null);
         let co=GetCo(e);
         let dy = co.y-this.startco.y;
         let bottom = this.startbottom-dy;
@@ -207,20 +211,22 @@ class DisplaySwipe {
         
         this.$root.style.bottom=bottom+"px";
     }
+    setMode(upQ){
+        let downQ = !upQ;
+        if(upQ===null){ //null turns them both off
+            upQ=false; downQ=false;
+        }
+        this.$root.classList.toggle("up",upQ);
+        this.$root.classList.toggle("down",downQ);
+        this.$root.style.bottom="";
+    }
     end(e) {
+        e.preventDefault();
         this.startco = undefined;
         this.$w.classList.remove("active");
         let bot = parseInt(this.$root.style.bottom);
-        if(2*bot > window.innerHeight) {//closer to top
-            this.$root.style.bottom=(window.innerHeight-50)+"px";
-            this.$w.classList.add("swipedown");
-            this.$w.classList.remove("swipeup");
-        } else {
-            this.$root.style.bottom="0px";
-            this.$w.classList.add("swipeup");
-            this.$w.classList.remove("swipedown");
-        }
-        e.preventDefault();
+        this.setMode(2*bot > window.innerHeight); //closer to top
+
     }
     
 }
@@ -229,6 +235,7 @@ function init(){
     DEBUG("starting");
     $parent = document.getElementById("entries");
     displayswipe = new DisplaySwipe();
+    displayswipe.setMode(true);
     Load();
 }
 ready(init);

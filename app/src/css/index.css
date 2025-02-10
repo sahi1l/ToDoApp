@@ -1,12 +1,9 @@
 body {
-
+    --swipeH: 3rem;
 }
 #entries {
     font-size:1.5em;
-}
-h1 {
-    width:100vw;
-    text-align: center;
+    margin-top: var(--swipeH);
 }
 
 #entries>div {
@@ -42,44 +39,77 @@ h1 {
 }
 #display {
     display: flex;
+    box-shadow: 5px 5px 5px;
     align-items: center;
     justify-content: center;
     z-index:2;
     background-color: rgb(200,200,200);
-    width:100vw;
     height:100vh;
     position:fixed;
     font-size: 10vw;
     bottom: 90vh;
     left: 0;
+    right:0;
     transition:bottom 1s;
     &:has(.active) {
         transition:bottom 0s;
     }
 }
-h1 {
-    position:relative;
-    z-index: 3;
-    margin:auto;
-    font-size:2rem;
-    display:inline-block;
-    pointer-events: none;
+
+#display.up {
+    bottom:calc(100vh - var(--swipeH));
+    .swipe::before {
+        content: "";
+    }
+/*    p {visibility:hidden;}*/
+}
+#display.down {
+    bottom:0vh;
+    top:0vh;
+   
+    .swipe::before {
+        content: "Edit ↑";
+        font-size: 1rem;
+        text-align:center;
+        padding-bottom:5px;
+    }
+/*    p {visibility:auto;}*/
 }
 #display .swipe {
     position:absolute;
     bottom:0;
     left:0;
     right:0;
+    height: var(--swipeH);
     text-align:center;
-    font-size:5vw;
+    font-size:2rem;
     opacity:0.4;
     &.active {
-        background-color: red;
+        background-color: rgb(150,150,150);
     }
-    &.swipeup::before {
-        content:"^^^";
+    .drag {
+        float: right;
+        pointer-events: none;
+        height: 100%;
+        position:relative;
+        top:1rem;
+        padding-right:1ex;
     }
-    &.swipedown::before {
-        content:"vvv";
-    }
+}
+h1 {
+    height: var(--swipeH);
+    position:relative;
+    z-index: 3;
+    margin:auto;
+    font-size:2rem;
+    display:inline-block;
+    pointer-events: none;
+    text-align: center;
+    transition: width 1s;
+    width: 100%;
+}
+body:has(.up) h1 {
+    text-align:left;
+    width:0;
+    transition: width 1s;
 }

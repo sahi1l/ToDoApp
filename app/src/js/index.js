@@ -192,22 +192,29 @@ class DisplaySwipe {
     position(pct) {
     }
     start(e) {
+        console.debug("START");
+        if (e.target.nodeName === 'INPUT') {return;}
         e.preventDefault();
-        console.debug(e);
         if(e.target != this.$w) {return;}
+        console.debug("a");
         this.startco = GetCo(e);
         this.startbottom = -this.$root.getBoundingClientRect().y;
         this.$w.classList.add("active");
+        this.bot = null;
 
     }
     move(e) {
-        e.preventDefault();
+        if (e.target.nodeName === 'INPUT') {
+            return;
+        }
         if (this.startco===undefined) {return;}
+        console.debug("MOVE");
         this.setMode(null);
         let co=GetCo(e);
         let dy = co.y-this.startco.y;
         let bottom = this.startbottom-dy;
         if(bottom<0){bottom=0;}
+        this.bot = bottom;
         
         this.$root.style.bottom=bottom+"px";
     }
@@ -221,11 +228,12 @@ class DisplaySwipe {
         this.$root.style.bottom="";
     }
     end(e) {
-        e.preventDefault();
+        if(this.startco===undefined){return;}
         this.startco = undefined;
         this.$w.classList.remove("active");
-        let bot = parseInt(this.$root.style.bottom);
-        this.setMode(2*bot > window.innerHeight); //closer to top
+        if(this.bot) {
+            this.setMode(2*this.bot > window.innerHeight); //closer to top
+        }
 
     }
     

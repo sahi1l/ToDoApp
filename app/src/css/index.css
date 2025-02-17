@@ -1,5 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Atma:wght@300;400;500;600;700&display=swap');
+
+
 body {
     --swipeH: 3rem;
+    font-family: Atma,Times,serif;
 }
 #entries {
     font-size:1.5em;
@@ -41,7 +45,7 @@ body {
     display: flex;
     box-shadow: 5px 5px 5px;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     z-index:2;
     background-color: rgb(200,200,200);
     height:100vh;
@@ -110,6 +114,39 @@ h1 {
 }
 body:has(.up) h1 {
     text-align:left;
+    margin-left:10%;
     width:0;
     transition: width 1s;
 }
+#display #approve, #display #next {
+    position:relative;
+    height:100%;
+    width:10%;
+    color: white;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    cursor:pointer;
+}
+#display #approve {
+    left:0;
+    background-color: green;
+}
+#display #next {
+    right:0;
+    background-color:blue;
+}
+#display #next.hidden {
+    font-size:0ex;
+}
+#entries div:has(input:checked) {
+    & input {
+        color:grey;
+    }
+}
+#display p.strikeout {
+    text-decoration: line-through;
+    text-decoration-thickness: 0.15em;
+    text-decoration-color: rgba(55,126,34,0.5);
+}
+input {font-family:inherit;}

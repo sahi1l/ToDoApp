@@ -1,12 +1,5 @@
 import {Preferences} from "@capacitor/preferences";
-/*import SetupSwipe from "./swipe.js";
-function handleSwipe(dir) {
-    DEBUG("handleSwipe: "+dir);
-    document.getElementById("duh").innerHTML=dir;
-}
-SetupSwipe(handleSwipe);
-*/
-/*NOTE: Add logos on sides to drag on and swipe*/
+let $approve; let $next;
 function DEBUG(txt) {
     console.debug(txt);
     let debug = document.getElementById("debug");
@@ -17,8 +10,9 @@ function DEBUG(txt) {
 let $parent;
 let prefkey="us_sahill_todo"
 let entries=[];
+let unchecked=[]; //this is slightly inefficient; a list of indices would be "better". but meh.
 function PushDonesDown() {
-    let unchecked=[];
+    unchecked=[];
     let checked=[];
     for(let entry of entries) {
         if(entry.ischecked()){
@@ -64,13 +58,15 @@ async function Load() {
     entries = [];
     let entry = null;
     for(let task of tasks) {
+        console.debug(task.length,":",task)
         entry = new Entry();
         entry.setval(task);
         entries.push(entry);
     }
-    AlwaysHaveOne();
-    DEBUG("done with Load");
+    console.debug(entries)
+    DEBUG("done with Load:"+String(entries.length));
     PushDonesDown();
+    DEBUG("done with PushDonesDown:"+String(entries.length));
 }
 function Next(entry) {
     let idx = entries.indexOf(entry);
@@ -131,9 +127,10 @@ class Entry {
         if(check){text="@"+text;}
         return text;
     }
-    fade(){
-        
+    gettext() {
+        return this.$text.value;
     }
+    fade() {}
     delete() {
         this.$w.classList.add("deleting");
         setTimeout((that=this)=> {
@@ -201,6 +198,7 @@ class DisplaySwipe {
         this.startbottom = -this.$root.getBoundingClientRect().y;
         this.$w.classList.add("active");
         this.bot = null;
+        ChooseRandom();
 
     }
     move(e) {
@@ -238,12 +236,56 @@ class DisplaySwipe {
     }
     
 }
-
+let selected=null;
+let $text;
+function ChooseRandom(){
+    let text;
+    let oldtext=$text.innerHTML;
+    if(unchecked.length===0){
+        text="DONE!";
+    } else {
+    //FIX: only choose from unchecked items
+        do {
+            let which = Math.floor(Math.random()*unchecked.length);
+            selected = entries[which];
+            text = selected.gettext();
+        } while (text==="" || (text==oldtext && unchecked.length>1));
+    }
+    $text.innerHTML=text;
+    $next.$w.classList.toggle("hidden",unchecked.length<=1);
+    console.debug("ChooseRandom");
+    $text.classList.remove("strikeout");
+    //FIX: maybe add some sort of animation, like a fadeIn
+}
+function ToggleCurrent(){
+    //for use on #display when clicking the checkbox button
+    //mark as complete
+    selected.$check.checked=!selected.$check.checked;
+    $text.classList.toggle("strikeout",selected.$check.checked);
+    
+    //reshuffle entries
+    PushDonesDown();
+    Save();
+}
+class sideButton {
+    constructor(query,command){
+        this.$w = document.querySelector(query);
+        this.$w.addEventListener("click",command);
+        //FIX: Make this a swipe thing instead, might need flag for which side it is on
+    }
+}
 function init(){
     DEBUG("starting");
     $parent = document.getElementById("entries");
+    $text=document.querySelector("#display>p");
     displayswipe = new DisplaySwipe();
-    displayswipe.setMode(true);
-    Load();
+    $approve = new sideButton("#display #approve",ToggleCurrent);
+    $next = new sideButton("#display #next",ChooseRandom);
+    Load().then(()=>{
+        console.debug(entries,entries.length);
+        displayswipe.setMode(entries.length==0);
+        AlwaysHaveOne();
+        ChooseRandom();
+    });
 }
 ready(init);

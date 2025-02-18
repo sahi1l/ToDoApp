@@ -1,5 +1,9 @@
 import {Preferences} from "@capacitor/preferences";
 let $approve; let $next;
+function $(descriptor){
+    return document.querySelector(descriptor);
+}
+
 function DEBUG(txt) {
     console.debug(txt);
     let debug = document.getElementById("debug");
@@ -11,6 +15,7 @@ let $parent;
 let prefkey="us_sahill_todo"
 let entries=[];
 let unchecked=[]; //this is slightly inefficient; a list of indices would be "better". but meh.
+let checked=[];
 function FindUndone() {
     unchecked=[];
     for(let entry of entries) {
@@ -48,12 +53,12 @@ async function Save() {
     let encode = JSON.stringify(results);
     Preferences.set({key:prefkey, value:encode});
     //NEW: Use GistBox to save this, in addition to Preferences
-    console.debug("saved ",encode);
+    console.debug("saved ",entries.length,encode);
 }
 function AlwaysHaveOne() {
-    if(entries.length === 0) {
-        entries.push(new Entry());
-    }
+//    if(entries.length === 0) {
+//        entries.push(new Entry());
+//    }
 }
 async function Load() {
     //load the cookie
@@ -90,22 +95,34 @@ function Prev(entry) {
     else {idx=idx-1;}
     return entries[idx];
 }
-class Entry {
+class BaseEntry {
     constructor() {
         this.$w = document.createElement("div");
-        this.$check = document.createElement("input");
-        this.$check.type = "checkbox";
+        this.$w.classList.add("entry");
         this.$textwrapper = document.createElement("div");
         this.$textwrapper.classList.add("textwrapper");
         this.$text = document.createElement("input");
         this.$text.classList.add("text");
-        this.$delete = document.createElement("button");
-        this.$delete.innerHTML = "🗑";
-        this.$w.appendChild(this.$check);
         this.$w.appendChild(this.$textwrapper);
         this.$textwrapper.appendChild(this.$text);
-        this.$w.appendChild(this.$delete);
         $parent.appendChild(this.$w);
+    }
+    gettext() {
+        return this.$text.value;
+    }
+    focus(){
+        this.$text.focus();
+    }
+}
+class Entry extends BaseEntry {
+    constructor() {
+        super();
+        this.$check = document.createElement("input");
+        this.$check.type = "checkbox";
+        this.$delete = document.createElement("button");
+        this.$delete.innerHTML = "🗑";
+        this.$w.insertBefore(this.$check,this.$textwrapper);
+        this.$w.appendChild(this.$delete);
         this.$delete.addEventListener("click",(e,that=this)=> {
             that.delete();
             Save();
@@ -116,7 +133,7 @@ class Entry {
             //move to bottom of list or checked list as relevant
         });
         this.$text.addEventListener("blur",(e,that=this)=> {
-                if(that.$text.value==""){that.delete();}
+            if(that.$text.value==""){that.delete();}
         });
         this.$text.addEventListener("keypress", (e,that=this) => {
             if(e.keyCode==13){
@@ -135,11 +152,8 @@ class Entry {
         if(check){text="@"+text;}
         return text;
     }
-    gettext() {
-        return this.$text.value;
-    }
-    fade() {}
     delete() {
+        console.debug("Deleting:",this)
         this.$w.classList.add("deleting");
         setTimeout((that=this)=> {
             let idx = entries.indexOf(that);
@@ -160,8 +174,28 @@ class Entry {
         this.$check.checked = check;
         PushDonesDown();
     }
-    focus(){
-        this.$text.focus();
+}
+class NewEntry extends BaseEntry {
+    constructor(){
+        super();
+        $("#newentry").appendChild(this.$w);
+        this.$w.insertBefore(document.createElement("div"),this.$textwrapper);
+        this.$w.appendChild(document.createElement("div"));
+        this.$text.style.color="blue";
+        this.$text.placeholder="Enter a new task and press return.";
+        this.$text.addEventListener("keypress",(e,that=this) => {
+            if(e.keyCode==13 && that.gettext()!==""){
+                let next = new Entry();
+                entries.push(next);
+                next.setval(that.gettext());
+                that.clear();
+                Save();
+                that.$text.focus();
+            }
+        });
+    }
+    clear(){
+        this.$text.value = "";
     }
 }
 function ready(fn) {
@@ -233,6 +267,7 @@ class DisplaySwipe {
         this.$root.classList.toggle("up",upQ);
         this.$root.classList.toggle("down",downQ);
         this.$root.style.bottom="";
+        this.$root.focus(); //I want to remove focus from any input boxes, this seemed easiest
     }
     end(e) {
         if(this.startco===undefined){return;}
@@ -285,15 +320,17 @@ function ToggleCurrent(){
 }
 class sideButton {
     constructor(query,command){
-        this.$w = document.querySelector(query);
+        this.$w = $(query);
         this.$w.addEventListener("click",command);
         //FIX: Make this a swipe thing instead, might need flag for which side it is on
     }
 }
+let $newentry;
 function init(){
     DEBUG("starting");
     $parent = document.getElementById("entries");
-    $text=document.querySelector("#display>p");
+    $newentry = new NewEntry();
+    $text=$("#display>p");
     displayswipe = new DisplaySwipe();
     $approve = new sideButton("#display #approve",ToggleCurrent);
     $next = new sideButton("#display #next",ChooseRandom);

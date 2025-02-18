@@ -10,7 +10,7 @@ body {
     margin-top: var(--swipeH);
 }
 
-#entries>div {
+.entry {
     display:flex;
     flex-direction: row;
     ;
@@ -139,7 +139,7 @@ body:has(.up) h1 {
 #display #next.hidden {
     font-size:0ex;
 }
-#entries div:has(input:checked) {
+.entry:has(input:checked) {
     & input {
         color:grey;
     }
@@ -150,3 +150,6 @@ body:has(.up) h1 {
     text-decoration-color: rgba(55,126,34,0.5);
 }
 input {font-family:inherit;}
+#newentry ::placeholder {
+    color:grey;
+}

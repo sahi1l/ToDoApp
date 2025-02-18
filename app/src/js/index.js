@@ -259,9 +259,10 @@ class DisplaySwipe {
 
     }
     move(e) {
+        /*
         if (e.target.nodeName === 'INPUT') {
             return;
-        }
+        }*/
         if (this.startco===undefined) {return;}
         console.debug("MOVE");
         this.setMode(null);
@@ -274,6 +275,7 @@ class DisplaySwipe {
         this.$root.style.bottom=bottom+"px";
     }
     setMode(upQ){
+        console.debug("setting mode to ",upQ);
         let downQ = !upQ;
         if(upQ===null){ //null turns them both off
             upQ=false; downQ=false;

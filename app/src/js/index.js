@@ -84,7 +84,7 @@ async function Load() {
 function Next(entry) {
     let idx = entries.indexOf(entry);
     if(idx==-1){idx=0;}
-    else if (idx==entries.length-1){return null;}
+    else if (idx==entries.length-1){idx=0;}//this was return null but not anymore
     else {idx=idx+1;}
     return entries[idx];
 }
@@ -138,7 +138,7 @@ class Entry extends BaseEntry {
         this.$text.addEventListener("keypress", (e,that=this) => {
             if(e.keyCode==13){
                 Save();
-                let next=Next(that)??entries.push(new Entry());
+                let next=Next(that);
                 Next(that).focus();
             }
         });

@@ -11,6 +11,14 @@ let $parent;
 let prefkey="us_sahill_todo"
 let entries=[];
 let unchecked=[]; //this is slightly inefficient; a list of indices would be "better". but meh.
+function FindUndone() {
+    unchecked=[];
+    for(let entry of entries) {
+        if(!entry.ischecked() && entry.getval()!=""){
+            unchecked.push(entry);
+        }
+    }
+}
 function PushDonesDown() {
     unchecked=[];
     let checked=[];
@@ -39,9 +47,8 @@ async function Save() {
     }
     let encode = JSON.stringify(results);
     Preferences.set({key:prefkey, value:encode});
+    //NEW: Use GistBox to save this, in addition to Preferences
     console.debug("saved ",encode);
-    console.debug(await Preferences.get({key:prefkey}));
-    //now save this as a cookie
 }
 function AlwaysHaveOne() {
     if(entries.length === 0) {
@@ -51,6 +58,7 @@ function AlwaysHaveOne() {
 async function Load() {
     //load the cookie
     //loop through them and create, using SetVal
+    //NEW: Use GistBox to load, with Preferences as backup
     let encode = await Preferences.get({key:prefkey});
     DEBUG("PREF:"+encode.value+"<BR>");
     console.debug(encode.value);
@@ -150,6 +158,7 @@ class Entry {
         if(check) {text=text.slice(1);}
         this.$text.value = text;
         this.$check.checked = check;
+        PushDonesDown();
     }
     focus(){
         this.$text.focus();
@@ -240,15 +249,22 @@ let selected=null;
 let $text;
 function ChooseRandom(){
     let text;
+    let counter=0;
+    console.debug("Starting ChooseRandom");
     let oldtext=$text.innerHTML;
+    FindUndone();
+    console.debug("A",unchecked,unchecked.length);
     if(unchecked.length===0){
         text="DONE!";
     } else {
+        console.debug("going in");
     //FIX: only choose from unchecked items
         do {
             let which = Math.floor(Math.random()*unchecked.length);
-            selected = entries[which];
+            selected = unchecked[which];
             text = selected.gettext();
+            counter++;
+            if(counter>1000){console.debug("Error",which,text,unchecked);break} //DEBUG
         } while (text==="" || (text==oldtext && unchecked.length>1));
     }
     $text.innerHTML=text;

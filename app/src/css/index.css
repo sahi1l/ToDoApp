@@ -5,9 +5,11 @@ body {
     --swipeH: 3rem;
     font-family: Atma,Times,serif;
 }
-#entries {
+.entries {
     font-size:1.5em;
-    margin-top: calc(2.25*var(--swipeH));
+    &#unchecked {
+        margin-top: calc(2.25*var(--swipeH));
+    }
 }
 
 .entry {
@@ -60,10 +62,16 @@ body {
     }
 }
 
+#display .swipe::before {
+    font-size: 1rem;
+    text-align:center;
+    padding-bottom:5px;
+    
+}
 #display.up {
     bottom:calc(100vh - var(--swipeH));
     .swipe::before {
-        content: "";
+        content: "Choose ↓";
     }
 /*    p {visibility:hidden;}*/
 }

@@ -11,7 +11,6 @@ function DEBUG(txt) {
         debug.innerHTML += "<BR>" + txt;
     }
 }
-let $parent;
 let prefkey="us_sahill_todo"
 let entries=[];
 let unchecked=[]; //this is slightly inefficient; a list of indices would be "better". but meh.
@@ -24,19 +23,20 @@ function FindUndone() {
         }
     }
 }
-function PushDonesDown() {
-    unchecked=[];
-    let checked=[];
-    for(let entry of entries) {
-        if(entry.ischecked()){
-            checked.push(entry);
-            $parent.appendChild(entry.$w);
-        } else {
-            unchecked.push(entry);
-        }
+Array.prototype.remove = function(elt){
+    let idx = this.indexOf(elt);
+    if(idx>=0){
+        this.splice(idx,1);
+        return true;
     }
-    entries = unchecked.concat(checked);
+    return false;
 }
+Array.prototype.addonce = function(elt){
+    if (!this.includes(elt)){
+        this.push(elt);
+    }
+}
+
 function FindFirstChecked(){
     for(let i=0; i<entries.length; i++){
         if(entries[i].ischecked()){
@@ -78,8 +78,6 @@ async function Load() {
     }
     console.debug(entries)
     DEBUG("done with Load:"+String(entries.length));
-    PushDonesDown();
-    DEBUG("done with PushDonesDown:"+String(entries.length));
 }
 function Next(entry) {
     let idx = entries.indexOf(entry);
@@ -96,7 +94,8 @@ function Prev(entry) {
     return entries[idx];
 }
 class BaseEntry {
-    constructor() {
+    constructor($parent) {
+        this.$parent = $parent;
         this.$w = document.createElement("div");
         this.$w.classList.add("entry");
         this.$textwrapper = document.createElement("div");
@@ -105,6 +104,10 @@ class BaseEntry {
         this.$text.classList.add("text");
         this.$w.appendChild(this.$textwrapper);
         this.$textwrapper.appendChild(this.$text);
+        $parent.appendChild(this.$w);
+    }
+    newparent($parent) {
+        this.$parent = $parent;
         $parent.appendChild(this.$w);
     }
     gettext() {
@@ -116,7 +119,7 @@ class BaseEntry {
 }
 class Entry extends BaseEntry {
     constructor() {
-        super();
+        super($("#unchecked"));
         this.$check = document.createElement("input");
         this.$check.type = "checkbox";
         this.$delete = document.createElement("button");
@@ -128,7 +131,7 @@ class Entry extends BaseEntry {
             Save();
         });
         this.$check.addEventListener("click",(e,that=this) => {
-            PushDonesDown();
+            this.putInList();
             Save();
             //move to bottom of list or checked list as relevant
         });
@@ -142,6 +145,7 @@ class Entry extends BaseEntry {
                 Next(that).focus();
             }
         });
+        this.putInList();
     }
     ischecked() {
         return this.$check.checked;
@@ -151,6 +155,17 @@ class Entry extends BaseEntry {
         let check = this.$check.checked;
         if(check){text="@"+text;}
         return text;
+    }
+    putInList() {
+        if(this.ischecked()){
+            unchecked.remove(this);
+            checked.addonce(this);
+            this.newparent($("#checked"));
+        } else {
+            checked.remove(this);
+            unchecked.addonce(this);
+            this.newparent($("#unchecked"));
+        }
     }
     delete() {
         console.debug("Deleting:",this)
@@ -172,13 +187,12 @@ class Entry extends BaseEntry {
         if(check) {text=text.slice(1);}
         this.$text.value = text;
         this.$check.checked = check;
-        PushDonesDown();
+        this.putInList();
     }
 }
 class NewEntry extends BaseEntry {
     constructor(){
-        super();
-        $("#newentry").appendChild(this.$w);
+        super($("#newentry"));
         this.$w.insertBefore(document.createElement("div"),this.$textwrapper);
         this.$w.appendChild(document.createElement("div"));
         this.$text.style.color="blue";
@@ -315,7 +329,6 @@ function ToggleCurrent(){
     $text.classList.toggle("strikeout",selected.$check.checked);
     
     //reshuffle entries
-    PushDonesDown();
     Save();
 }
 class sideButton {
@@ -328,7 +341,6 @@ class sideButton {
 let $newentry;
 function init(){
     DEBUG("starting");
-    $parent = document.getElementById("entries");
     $newentry = new NewEntry();
     $text=$("#display>p");
     displayswipe = new DisplaySwipe();
